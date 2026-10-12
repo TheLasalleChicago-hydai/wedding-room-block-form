@@ -436,8 +436,12 @@
 
     requireRadio(errors, "catering_needed", "Select whether you will require catering.");
     if (valueOf("catering_needed") === "yes") {
-      requireFilled(errors, "catering_menu_choices", "Select a catering menu choice.");
-      if (valueOf("catering_menu_choices") === "Catering Menu") {
+      const menuChoices = collectCateringMenuChoices();
+      if (!menuChoices.length) {
+        errors.catering_menu_choices =
+          "Select at least one: a Bride package, a Groom package, and/or Catering Menu.";
+      }
+      if (menuChoices.includes("Catering Menu")) {
         requireFilled(errors, "CateringMenuSelections", "Enter your catering menu selections.");
       }
       if (staffMode) {
@@ -761,6 +765,31 @@
     });
   }
 
+  function collectCateringMenuChoices() {
+    return Array.from(document.querySelectorAll("input[data-menu-choice]:checked")).map((el) => el.value);
+  }
+
+  function applyCateringMenuChoices(list) {
+    let values = [];
+    if (Array.isArray(list)) values = list;
+    else if (typeof list === "string" && list.trim()) {
+      values = list.split(/[;\n,]/).map((s) => s.trim()).filter(Boolean);
+    }
+    const set = new Set(values);
+    document.querySelectorAll("input[data-menu-choice]").forEach((el) => {
+      el.checked = set.has(el.value);
+    });
+  }
+
+  /** Within bride/groom groups, only one checkbox may stay checked. */
+  function enforceMenuChoiceGroup(changed) {
+    const group = changed.getAttribute("data-menu-group");
+    if (!group || group === "menu" || !changed.checked) return;
+    document.querySelectorAll(`input[data-menu-choice][data-menu-group="${group}"]`).forEach((el) => {
+      if (el !== changed) el.checked = false;
+    });
+  }
+
   function formatAllergySummary(counts, names) {
     const parts = ALLERGY_TYPES.filter((t) => counts[t] > 0).map((t) => t + ": " + counts[t]);
     const countLine = parts.length ? parts.join("; ") : "None";
@@ -855,7 +884,6 @@
       "bags_delivery_time",
       "bags_distribution",
       "catering_needed",
-      "catering_menu_choices",
       "CateringMenuSelections", /* → list CateringMenuSelections */
       "menu_selected", /* → BEO Signed (Catering Menu Selected) */
       "catering_allergy_names",
@@ -924,7 +952,8 @@
     payload.transport_block = formatTransportBlock(); /* → Shuttle/Trans Details */
     payload.valet_details = formatValetDetails(); /* → Vendor Details */
     payload.vendors = collectVendors(); /* → Vendor Name (JSON string in PA) */
-    payload.ConcessionsAwarded = collectConcessionsAwarded(); /* → Concessions Awarded (staff MultiChoice) */
+    payload.ConcessionsAwarded = collectConcessionsAwarded(); /* → Concessions Awarded (text; PA join) */
+    payload.catering_menu_choices = collectCateringMenuChoices(); /* → Catering Menu Choices (text; PA join) */
     /* staff_task_list: list-only checklist in SharePoint — not collected on the form */
 
     /* DEPRECATED_LEGACY_ALIASES — remove after confirmed live
@@ -986,6 +1015,7 @@
         key === "ready_room_access_datetime" ||
         key === "ConcessionsAwarded" ||
         key === "concessions_awarded" ||
+        key === "catering_menu_choices" ||
         key === "staff_task_list"
       ) {
         return;
@@ -999,6 +1029,7 @@
     renderCoupleParentRows(payload.couple_parents_list);
     applyAllergyCounts(payload.catering_allergy_counts);
     applyConcessionsAwarded(payload.ConcessionsAwarded != null ? payload.ConcessionsAwarded : payload.concessions_awarded);
+    applyCateringMenuChoices(payload.catering_menu_choices);
     syncConditionals();
     const wedding = dateIsoOf("wedding_date");
     const expectedComplete = wedding ? addDaysIso(wedding, -30) : "";
@@ -1019,7 +1050,7 @@
     toggle("catering-details", valueOf("catering_needed") === "yes");
     toggle(
       "catering-menu-selections-details",
-      valueOf("catering_needed") === "yes" && valueOf("catering_menu_choices") === "Catering Menu"
+      valueOf("catering_needed") === "yes" && collectCateringMenuChoices().includes("Catering Menu")
     );
   }
 
@@ -1557,12 +1588,19 @@
   }
 
   function wireConditionals() {
-    ["getting_ready_needed", "transport_required", "valet_needed", "valet_payment", "giftbags_provided", "catering_needed", "catering_menu_choices"].forEach((name) => {
+    ["getting_ready_needed", "transport_required", "valet_needed", "valet_payment", "giftbags_provided", "catering_needed"].forEach((name) => {
       els.form.querySelectorAll(`input[name="${name}"], select[name="${name}"]`).forEach((input) => {
         input.addEventListener("change", () => {
           syncConditionals();
           markDirty();
         });
+      });
+    });
+    els.form.querySelectorAll("input[data-menu-choice]").forEach((input) => {
+      input.addEventListener("change", () => {
+        enforceMenuChoiceGroup(input);
+        syncConditionals();
+        markDirty();
       });
     });
   }

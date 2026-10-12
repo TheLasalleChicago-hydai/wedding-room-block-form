@@ -211,24 +211,24 @@
               <div class="field" data-field="vip_names" style="grid-column: 1 / -1">
                 <label for="vip_names">VIP upgrades</label>
                 <p class="hint">
-                  Enter each concession and the guest who should receive it, following the example below.
+                  Free-text notes for VIP / upgraded rooms (guest names and what they receive). This fills list
+                  <strong>VIP Upgrade</strong> only — not Concessions Awarded.
                   Please speak with your hotel representative for more information about available concessions.
                 </p>
                 <textarea
                   id="vip_names"
                   name="vip_names"
-                  placeholder="Concession 1 — Guest name&#10;Concession 2 — Guest name"
+                  placeholder="e.g. Suite upgrade — Jane Smith&#10;Late checkout — John Smith"
                 ></textarea>
                 <div class="field-error" data-error-for="vip_names"></div>
               </div>
               <div class="field" data-field="ConcessionsAwarded" data-staff-only hidden style="grid-column: 1 / -1">
                 <label>Concessions awarded</label>
-                <p class="hint">Staff only — select concessions awarded for this group.</p>
+                <p class="hint">Staff only — MultiChoice for list <strong>Concessions Awarded</strong> (separate from VIP Upgrade text).</p>
                 <div class="choice-row" id="concessions-awarded-choices">
                   <label><input type="checkbox" name="ConcessionsAwarded" value="Concession 1" data-concession /> Concession 1</label>
                   <label><input type="checkbox" name="ConcessionsAwarded" value="Concession 2" data-concession /> Concession 2</label>
                   <label><input type="checkbox" name="ConcessionsAwarded" value="Concession 3" data-concession /> Concession 3</label>
-                  <label><input type="checkbox" name="ConcessionsAwarded" value="Concession 4" data-concession /> Concession 4</label>
                 </div>
                 <div class="field-error" data-error-for="ConcessionsAwarded"></div>
               </div>
@@ -272,21 +272,37 @@
             <div id="catering-details" class="conditional" hidden>
               <div class="field-grid two">
                 <div class="field" data-field="catering_menu_choices" style="grid-column: 1 / -1">
-                  <label for="catering_menu_choices">Catering menu choices</label>
-                  <select id="catering_menu_choices" name="catering_menu_choices">
-                    <option value="">Select…</option>
-                    <option value="Bride's - Silver">Bride's - Silver</option>
-                    <option value="Bride's - Gold">Bride's - Gold</option>
-                    <option value="Bride's - Platinum">Bride's - Platinum</option>
-                    <option value="Groom's - Silver">Groom's - Silver</option>
-                    <option value="Groom's - Gold">Groom's - Gold</option>
-                    <option value="Catering Menu">Catering Menu</option>
-                  </select>
+                  <label>Catering menu choices</label>
+                  <p class="hint">
+                    Pick up to one Bride package, up to one Groom package, and/or Catering Menu.
+                    If you choose Catering Menu, enter items in Catering menu selections below.
+                  </p>
                   <p class="hint menu-doc-links">
                     <a href="assets/Wedding%20Getting%20Ready%20Packages.pdf" target="_blank" rel="noopener noreferrer">Wedding packages (PDF)</a>
                     <span aria-hidden="true"> · </span>
                     <a href="assets/LaSalle%20Catering%20Menu%202026.pdf" target="_blank" rel="noopener noreferrer">Catering menu (PDF)</a>
                   </p>
+                  <fieldset class="menu-choice-group">
+                    <legend>Bride package <span class="hint-inline">(max 1)</span></legend>
+                    <div class="choice-row">
+                      <label><input type="checkbox" name="catering_menu_choices" value="Bride's - Silver" data-menu-choice data-menu-group="bride" /> Bride's - Silver</label>
+                      <label><input type="checkbox" name="catering_menu_choices" value="Bride's - Gold" data-menu-choice data-menu-group="bride" /> Bride's - Gold</label>
+                      <label><input type="checkbox" name="catering_menu_choices" value="Bride's - Platinum" data-menu-choice data-menu-group="bride" /> Bride's - Platinum</label>
+                    </div>
+                  </fieldset>
+                  <fieldset class="menu-choice-group">
+                    <legend>Groom package <span class="hint-inline">(max 1)</span></legend>
+                    <div class="choice-row">
+                      <label><input type="checkbox" name="catering_menu_choices" value="Groom's - Silver" data-menu-choice data-menu-group="groom" /> Groom's - Silver</label>
+                      <label><input type="checkbox" name="catering_menu_choices" value="Groom's - Gold" data-menu-choice data-menu-group="groom" /> Groom's - Gold</label>
+                    </div>
+                  </fieldset>
+                  <fieldset class="menu-choice-group">
+                    <legend>À la carte</legend>
+                    <div class="choice-row">
+                      <label><input type="checkbox" name="catering_menu_choices" value="Catering Menu" data-menu-choice data-menu-group="menu" /> Catering Menu</label>
+                    </div>
+                  </fieldset>
                   <div class="field-error" data-error-for="catering_menu_choices"></div>
                 </div>
                 <div id="catering-menu-selections-details" class="conditional" hidden style="grid-column: 1 / -1">

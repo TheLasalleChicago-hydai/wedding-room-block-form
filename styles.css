@@ -444,6 +444,25 @@ textarea {
   cursor: pointer;
 }
 
+.menu-choice-group {
+  border: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+
+.menu-choice-group legend {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 0.15rem;
+}
+
+.hint-inline {
+  font-weight: 400;
+  color: var(--muted, #6b6b6b);
+  font-size: 0.85em;
+}
+
 .conditional {
   margin-top: 1rem;
   padding-top: 1rem;
