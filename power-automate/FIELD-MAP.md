@@ -126,6 +126,7 @@ Also sent: `couple_parents_list` (UI only).
 | Ready Room Needed | ReadyRoom | `getting_ready_needed` | Choice /Value |
 | Ready Room Guests Number | ReadyRoomGuests | `getting_ready_guests` | |
 | Ready Room Access D/T | ReadyRoomAccess | `date_getting_ready` | SharePoint DateTime; convert from `Central Standard Time` to `UTC` before writing so the displayed local time is preserved |
+| Ready Room Access End D/T | ReadyRoomAccessEnd | `date_getting_ready_end` | SharePoint DateTime; convert from `Central Standard Time` to `UTC` before writing so the displayed local time is preserved |
 | Catering Needed | CateringNeeded | `catering_needed` | Choice /Value |
 | Catering Menu Choices | CateringMenuChoices | `catering_menu_choices` | Text; ≤1 bride, ≤1 groom, + Catering Menu; PA `join` |
 | Catering Menu Selections | CateringMenuSelections | `CateringMenuSelections` | Note |

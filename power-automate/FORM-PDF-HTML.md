@@ -172,7 +172,7 @@ Put **Response 200** immediately after SharePoint Create/Update — **before** H
       <div class="field right"><label>Gift bag delivery</label><div class="box">@{json(triggerBody())?['payload']?['date_gift_bag']}</div></div>
     </div>
     <div class="pair">
-      <div class="field"><label>Getting-ready room access</label><div class="box">@{json(triggerBody())?['payload']?['date_getting_ready']}</div></div>
+      <div class="field"><label>Getting-ready room access</label><div class="box">@{json(triggerBody())?['payload']?['date_getting_ready']} to @{json(triggerBody())?['payload']?['date_getting_ready_end']}</div></div>
       <div class="field right"><label>Complete by</label><div class="box">@{json(triggerBody())?['payload']?['complete_by']}</div></div>
     </div>
   </div>

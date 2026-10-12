@@ -255,9 +255,14 @@
                   <div class="field-error" data-error-for="getting_ready_guests"></div>
                 </div>
                 <div class="field" data-field="date_getting_ready">
-                  <label for="date_getting_ready">Get ready room access date & time (8:00am to 5:pm)</label>
+                  <label for="date_getting_ready">Get ready room access start</label>
                   <input id="date_getting_ready" name="date_getting_ready" type="datetime-local" data-datetime-input />
                   <div class="field-error" data-error-for="date_getting_ready"></div>
+                </div>
+                <div class="field" data-field="date_getting_ready_end">
+                  <label for="date_getting_ready_end">Get ready room access end</label>
+                  <input id="date_getting_ready_end" name="date_getting_ready_end" type="datetime-local" data-datetime-input />
+                  <div class="field-error" data-error-for="date_getting_ready_end"></div>
                 </div>
               </div>
             </div>
@@ -278,7 +283,7 @@
                   </p>
                   <fieldset class="menu-choice-group">
                     <legend>
-                      <a href="assets/LaSalle%20Farewell%20Brunch%20Menu.pdf" target="_blank" rel="noopener noreferrer" class="menu-link-title">Farewell Brunch</a>
+                      <a href="assets/Farewell%20Brunch%20Menu.pdf" target="_blank" rel="noopener noreferrer" class="menu-link-title">Farewell Brunch</a>
                     </legend>
                     <div class="choice-row">
                       <label><input type="checkbox" name="catering_menu_choices" value="Farewell Brunch" data-menu-choice data-menu-group="menu" /> Farewell Brunch</label>
@@ -495,7 +500,7 @@
                     <label><input type="radio" name="valet_payment" value="Couple's Room" /> Couple's Room</label>
                     <label><input type="radio" name="valet_payment" value="CC on File" /> CC on File</label>
                     <label><input type="radio" name="valet_payment" value="Charge to Vendors" /> Charge to Vendors</label>
-                    <label><input type="radio" name="valet_payment" value="other" /> Other (Select Vendor Payment)</label>
+                    <label><input type="radio" name="valet_payment" value="other" /> Other (Selective Vendor Payment)</label>
                   </div>
                   <div class="field-error" data-error-for="valet_payment"></div>
                 </div>

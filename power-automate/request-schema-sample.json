@@ -8,6 +8,8 @@
     "wedding_date": "2026-06-14",
     "date_getting_ready": "2026-06-13T09:46",
     "ready_room_access_datetime": "2026-06-13T09:46",
+    "date_getting_ready_end": "2026-06-13T15:00",
+    "ready_room_access_end_datetime": "2026-06-13T15:00",
     "bags_delivery_date": "2026-06-13",
     "bags_delivery_time": "09:00",
     "bags_distribution": "Tag individualized bags with the guest name.",

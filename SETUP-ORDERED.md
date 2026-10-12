@@ -139,6 +139,18 @@ The form value is a local Central Time value. Converting it to UTC before writin
 to SharePoint prevents SharePoint from subtracting the time-zone offset again.
 Do not use `formatDateTime(..., 'yyyy-MM-dd')`; that removes the access time.
 
+Add a second SharePoint **Date and time** column named **Ready Room Access End**
+with internal name `ReadyRoomAccessEnd`. Map it in both Save Draft and Submit
+actions with:
+
+```text
+@if(empty(json(triggerBody())?['payload']?['date_getting_ready_end']), null, convertTimeZone(json(triggerBody())?['payload']?['date_getting_ready_end'], 'Central Standard Time', 'UTC', 'yyyy-MM-ddTHH:mm:ssZ'))
+```
+
+The existing **Ready Room Access D/T** column stores the start of the range;
+**Ready Room Access End** stores the end. The complete range remains available
+in the saved Payload JSON as `date_getting_ready` and `date_getting_ready_end`.
+
 Add these SharePoint columns if they do not already exist:
 
 | Display name | Internal name | Type |

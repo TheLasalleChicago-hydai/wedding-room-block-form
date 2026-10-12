@@ -305,6 +305,16 @@
     return time >= "08:00" && time <= "17:00";
   }
 
+  function isValidReadyRoomDateTimeRange(start, end) {
+    const normalizedStart = normalizeDateTimeLocal(start);
+    const normalizedEnd = normalizeDateTimeLocal(end);
+    return (
+      isValidReadyRoomDateTime(normalizedStart) &&
+      isValidReadyRoomDateTime(normalizedEnd) &&
+      normalizedEnd > normalizedStart
+    );
+  }
+
   function setStatus(message, kind) {
     els.saveStatus.textContent = message;
     els.saveStatus.classList.remove("is-error", "is-ok");
@@ -401,7 +411,15 @@
         errors.getting_ready_guests = "Enter ready room estimated guest count.";
       }
       if (!isValidReadyRoomDateTime(valueOf("date_getting_ready"))) {
-        errors.date_getting_ready = "Select a ready room access time between 8:00 AM and 5:00 PM.";
+        errors.date_getting_ready = "Select a ready room access start between 8:00 AM and 5:00 PM.";
+      }
+      if (!isValidReadyRoomDateTime(valueOf("date_getting_ready_end"))) {
+        errors.date_getting_ready_end = "Select a ready room access end between 8:00 AM and 5:00 PM.";
+      } else if (
+        normalizeDateTimeLocal(valueOf("date_getting_ready")) &&
+        !isValidReadyRoomDateTimeRange(valueOf("date_getting_ready"), valueOf("date_getting_ready_end"))
+      ) {
+        errors.date_getting_ready_end = "End must be after the ready room access start.";
       }
     }
 
@@ -553,7 +571,17 @@
       });
       const readyRoomAccess = valueOf("date_getting_ready");
       if (readyRoomAccess && !isValidReadyRoomDateTime(readyRoomAccess)) {
-        errors.date_getting_ready = "Enter a ready room access time between 8:00 AM and 5:00 PM.";
+        errors.date_getting_ready = "Enter a ready room access start between 8:00 AM and 5:00 PM.";
+      }
+      const readyRoomAccessEnd = valueOf("date_getting_ready_end");
+      if (readyRoomAccessEnd && !isValidReadyRoomDateTime(readyRoomAccessEnd)) {
+        errors.date_getting_ready_end = "Enter a ready room access end between 8:00 AM and 5:00 PM.";
+      } else if (
+        readyRoomAccess &&
+        readyRoomAccessEnd &&
+        !isValidReadyRoomDateTimeRange(readyRoomAccess, readyRoomAccessEnd)
+      ) {
+        errors.date_getting_ready_end = "End must be after the ready room access start.";
       }
 
       ["guests", "getting_ready_guests"].forEach((name) => {
@@ -900,6 +928,8 @@
 
     const readyAccess =
       normalizeDateTimeLocal(valueOf("date_getting_ready")) || valueOf("date_getting_ready");
+    const readyAccessEnd =
+      normalizeDateTimeLocal(valueOf("date_getting_ready_end")) || valueOf("date_getting_ready_end");
 
     const payload = {
       complete_by: dateIsoOf("complete_by"),
@@ -914,6 +944,8 @@
       date_getting_ready: readyAccess,
       /* Schema alias — Ready Room Access D/T */
       ready_room_access_datetime: readyAccess,
+      date_getting_ready_end: readyAccessEnd,
+      ready_room_access_end_datetime: readyAccessEnd,
     };
 
     fields.forEach((name) => {
@@ -1583,7 +1615,7 @@
     document.querySelectorAll("[data-datetime-input]").forEach((input) => {
       input.addEventListener("change", () => {
         const v = input.value.trim();
-        const valid = input.id === "date_getting_ready"
+        const valid = input.id === "date_getting_ready" || input.id === "date_getting_ready_end"
           ? isValidReadyRoomDateTime(v)
           : isValidDateTimeLocal(v);
         if (v && !valid) input.classList.add("is-invalid");
