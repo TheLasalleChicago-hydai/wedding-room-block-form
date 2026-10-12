@@ -50,7 +50,7 @@ Power Automate Create/Update: map **Couple Parents** ← `json(triggerBody())?['
 | Vendor Valet Needed | ValetNeeded | `valet_needed` | |
 | Vendor Name | Vendors | `vendors` | JSON array; stringify in PA |
 | Vendor Details | ValetDetails | `valet_details` | Composed text block |
-| Valet Payment | ValetPayment | `valet_payment` | |
+| Valet Payment | ValetPayment | `valet_payment` | Form values: `Room` · `CC on File` · `Vendor Charge` · `other` (update list choices to match) |
 | Ready Room Needed | ReadyRoom | `getting_ready_needed` | |
 | Ready Room Guests Number | ReadyRoomGuests | `getting_ready_guests` | |
 | Ready Room Access D/T | ReadyRoomAccess | `ready_room_access_datetime` (= `date_getting_ready`) | datetime |

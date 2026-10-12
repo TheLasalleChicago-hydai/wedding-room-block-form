@@ -273,11 +273,6 @@
               <div class="field-grid two">
                 <div class="field" data-field="catering_menu_choices" style="grid-column: 1 / -1">
                   <label for="catering_menu_choices">Catering menu choices</label>
-                  <p class="hint menu-doc-links">
-                    <a href="assets/Wedding%20Getting%20Ready%20Packages.pdf" target="_blank" rel="noopener noreferrer">Wedding packages (PDF)</a>
-                    <span aria-hidden="true"> · </span>
-                    <a href="assets/LaSalle%20Catering%20Menu%202026.pdf" target="_blank" rel="noopener noreferrer">Catering menu (PDF)</a>
-                  </p>
                   <select id="catering_menu_choices" name="catering_menu_choices">
                     <option value="">Select…</option>
                     <option value="Bride's - Silver">Bride's - Silver</option>
@@ -285,20 +280,28 @@
                     <option value="Bride's - Platinum">Bride's - Platinum</option>
                     <option value="Groom's - Silver">Groom's - Silver</option>
                     <option value="Groom's - Gold">Groom's - Gold</option>
+                    <option value="Catering Menu">Catering Menu</option>
                   </select>
+                  <p class="hint menu-doc-links">
+                    <a href="assets/Wedding%20Getting%20Ready%20Packages.pdf" target="_blank" rel="noopener noreferrer">Wedding packages (PDF)</a>
+                    <span aria-hidden="true"> · </span>
+                    <a href="assets/LaSalle%20Catering%20Menu%202026.pdf" target="_blank" rel="noopener noreferrer">Catering menu (PDF)</a>
+                  </p>
                   <div class="field-error" data-error-for="catering_menu_choices"></div>
                 </div>
-                <div class="field" data-field="CateringMenuSelections" style="grid-column: 1 / -1">
-                  <label for="CateringMenuSelections">Catering menu selections</label>
-                  <p class="hint">
-                    If ordering from the catering menu, please type your selections here.
-                  </p>
-                  <textarea
-                    id="CateringMenuSelections"
-                    name="CateringMenuSelections"
-                    placeholder="e.g. Bride’s Gold — smoked salmon board; Groom’s Silver — continental"
-                  ></textarea>
-                  <div class="field-error" data-error-for="CateringMenuSelections"></div>
+                <div id="catering-menu-selections-details" class="conditional" hidden style="grid-column: 1 / -1">
+                  <div class="field" data-field="CateringMenuSelections">
+                    <label for="CateringMenuSelections">Catering menu selections</label>
+                    <p class="hint">
+                      If ordering from the catering menu, please type your selections here (see the Catering menu PDF).
+                    </p>
+                    <textarea
+                      id="CateringMenuSelections"
+                      name="CateringMenuSelections"
+                      placeholder="e.g. Classic Continental; The LaSalle breakfast buffet; Protein Fit"
+                    ></textarea>
+                    <div class="field-error" data-error-for="CateringMenuSelections"></div>
+                  </div>
                 </div>
                 <div class="field" data-field="menu_selected" data-staff-only hidden>
                   <label>BEO Signed &amp; Submitted</label>
@@ -427,7 +430,7 @@
                 <input id="transport_return" name="transport_return" type="time" data-time-input />
                 <div class="field-error" data-error-for="transport_return"></div>
               </div>
-              <div class="field" data-field="transport_venue" style="grid-column: 1 / -1">
+              <div class="field" data-field="transport_venue">
                 <label for="transport_venue">Wedding venue (for shuttle)</label>
                 <input id="transport_venue" name="transport_venue" type="text" />
                 <div class="field-error" data-error-for="transport_venue"></div>
@@ -458,19 +461,29 @@
                 <div class="field" data-field="valet_payment">
                   <label>How will vendor valet be billed?</label>
                   <div class="choice-row">
-                    <label><input type="radio" name="valet_payment" value="individual" /> Individual</label>
-                    <label><input type="radio" name="valet_payment" value="hosted" /> Hosted</label>
-                    <label><input type="radio" name="valet_payment" value="master" /> Master</label>
+                    <label><input type="radio" name="valet_payment" value="Room" /> Room</label>
+                    <label><input type="radio" name="valet_payment" value="CC on File" /> CC on File</label>
+                    <label><input type="radio" name="valet_payment" value="Vendor Charge" /> Vendor Charge</label>
                     <label><input type="radio" name="valet_payment" value="other" /> Other</label>
                   </div>
                   <div class="field-error" data-error-for="valet_payment"></div>
                 </div>
-                <div class="field-grid two">
+                <div id="valet-other-details" class="conditional" hidden>
                   <div class="field" data-field="valet_other">
-                    <label for="valet_other">If other, describe</label>
-                    <input id="valet_other" name="valet_other" type="text" />
+                    <label for="valet_other">Selective vendor payment</label>
+                    <p class="hint">
+                      If paying for select vendors only, choose Other and list those vendor names here.
+                    </p>
+                    <input
+                      id="valet_other"
+                      name="valet_other"
+                      type="text"
+                      placeholder="e.g. Florist Co; DJ Productions"
+                    />
                     <div class="field-error" data-error-for="valet_other"></div>
                   </div>
+                </div>
+                <div class="field-grid two">
                   <div class="field" data-field="valet_billing_contact">
                     <label for="valet_billing_contact">Authorized billing contact</label>
                     <input id="valet_billing_contact" name="valet_billing_contact" type="text" />

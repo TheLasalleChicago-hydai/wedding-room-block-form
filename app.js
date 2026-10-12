@@ -418,7 +418,7 @@
     if (valueOf("valet_needed") === "yes") {
       requireRadio(errors, "valet_payment", "Select how vendor valet will be billed.");
       if (valueOf("valet_payment") === "other") {
-        requireFilled(errors, "valet_other", "Describe the other billing arrangement.");
+        requireFilled(errors, "valet_other", "List the vendor names covered by selective payment.");
       }
       requireFilled(errors, "valet_billing_contact", "Enter the billing contact.");
       requireFilled(errors, "valet_billing_instructions", "Enter billing instructions.");
@@ -437,6 +437,9 @@
     requireRadio(errors, "catering_needed", "Select whether you will require catering.");
     if (valueOf("catering_needed") === "yes") {
       requireFilled(errors, "catering_menu_choices", "Select a catering menu choice.");
+      if (valueOf("catering_menu_choices") === "Catering Menu") {
+        requireFilled(errors, "CateringMenuSelections", "Enter your catering menu selections.");
+      }
       if (staffMode) {
         requireRadio(errors, "menu_selected", "Select whether the BEO is signed and submitted.");
       }
@@ -804,12 +807,13 @@
 
   function formatValetDetails() {
     if (valueOf("valet_needed") !== "yes") return "";
-    return [
-      "Payment: " + valueOf("valet_payment"),
-      "Other: " + valueOf("valet_other"),
-      "Billing contact: " + valueOf("valet_billing_contact"),
-      "Instructions: " + valueOf("valet_billing_instructions"),
-    ].join("\n");
+    const lines = ["Payment: " + valueOf("valet_payment")];
+    if (valueOf("valet_payment") === "other" && valueOf("valet_other")) {
+      lines.push("Selective vendors: " + valueOf("valet_other"));
+    }
+    lines.push("Billing contact: " + valueOf("valet_billing_contact"));
+    lines.push("Instructions: " + valueOf("valet_billing_instructions"));
+    return lines.join("\n");
   }
 
   function collectPayload() {
@@ -1010,8 +1014,13 @@
     toggle("getting-ready-details", valueOf("getting_ready_needed") === "yes");
     toggle("transport-details", valueOf("transport_required") === "yes");
     toggle("valet-details", valueOf("valet_needed") === "yes");
+    toggle("valet-other-details", valueOf("valet_needed") === "yes" && valueOf("valet_payment") === "other");
     toggle("bags-details", valueOf("giftbags_provided") === "yes");
     toggle("catering-details", valueOf("catering_needed") === "yes");
+    toggle(
+      "catering-menu-selections-details",
+      valueOf("catering_needed") === "yes" && valueOf("catering_menu_choices") === "Catering Menu"
+    );
   }
 
   function toggle(id, show) {
@@ -1548,8 +1557,8 @@
   }
 
   function wireConditionals() {
-    ["getting_ready_needed", "transport_required", "valet_needed", "giftbags_provided", "catering_needed"].forEach((name) => {
-      els.form.querySelectorAll(`input[name="${name}"]`).forEach((input) => {
+    ["getting_ready_needed", "transport_required", "valet_needed", "valet_payment", "giftbags_provided", "catering_needed", "catering_menu_choices"].forEach((name) => {
+      els.form.querySelectorAll(`input[name="${name}"], select[name="${name}"]`).forEach((input) => {
         input.addEventListener("change", () => {
           syncConditionals();
           markDirty();
