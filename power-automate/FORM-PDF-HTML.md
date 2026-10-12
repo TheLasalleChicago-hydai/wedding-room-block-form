@@ -125,7 +125,6 @@ Put **Response 200** immediately after SharePoint Create/Update — **before** H
       <div class="field"><label>If other, describe</label><div class="box">@{json(triggerBody())?['payload']?['valet_other']}</div></div>
     </div>
     <div class="pair">
-      <div class="field"><label>Billing contact</label><div class="box">@{json(triggerBody())?['payload']?['valet_billing_contact']}</div></div>
       <div class="field right"><label>Billing instructions</label><div class="box">@{json(triggerBody())?['payload']?['valet_billing_instructions']}</div></div>
     </div>
   </div>

@@ -422,7 +422,6 @@
       if (valueOf("valet_payment") === "other") {
         requireFilled(errors, "valet_other", "List the vendor names covered by selective payment.");
       }
-      requireFilled(errors, "valet_billing_contact", "Enter the billing contact.");
       requireFilled(errors, "valet_billing_instructions", "Enter billing instructions.");
     }
 
@@ -441,7 +440,7 @@
       const menuChoices = collectCateringMenuChoices();
       if (!menuChoices.length) {
         errors.catering_menu_choices =
-          "Select at least one: a Bride package, a Groom package, and/or Catering Menu.";
+          "Select at least one: Farewell Brunch, Catering Menu, Bride package, or Groom package.";
       }
       if (menuChoices.includes("Catering Menu") || menuChoices.includes("Farewell Brunch")) {
         requireFilled(errors, "CateringMenuSelections", "Enter your catering menu selections.");
@@ -845,7 +844,6 @@
     if (valueOf("valet_payment") === "other" && valueOf("valet_other")) {
       lines.push("Selective vendors: " + valueOf("valet_other"));
     }
-    lines.push("Billing contact: " + valueOf("valet_billing_contact"));
     lines.push("Instructions: " + valueOf("valet_billing_instructions"));
     return lines.join("\n");
   }
@@ -882,7 +880,6 @@
       "valet_needed",
       "valet_payment",
       "valet_other",
-      "valet_billing_contact",
       "valet_billing_instructions",
       "giftbags_provided",
       "bags_payment_method", /* → Gift Bag Payment Method */
