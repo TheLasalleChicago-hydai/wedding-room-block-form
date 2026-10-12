@@ -387,11 +387,14 @@
       errors.couple_parents = "For each checked parent, enter both name and relation.";
     }
 
-    requireRadio(errors, "getting_ready_needed", "Select whether a getting-ready room is needed.");
+    requireRadio(errors, "getting_ready_needed", "Select whether a ready room is needed.");
     if (valueOf("getting_ready_needed") === "yes") {
       const rr = valueOf("getting_ready_guests");
       if (rr === "" || !isValidNumeric(rr, false)) {
-        errors.getting_ready_guests = "Enter ready room guest count.";
+        errors.getting_ready_guests = "Enter ready room estimated guest count.";
+      }
+      if (!normalizeDateTimeLocal(valueOf("date_getting_ready"))) {
+        errors.date_getting_ready = "Select ready room access date and time.";
       }
     }
 
@@ -403,13 +406,10 @@
       }
       requireFilled(errors, "transport_vehicles", "Enter number / type of vehicles.");
       if (!normalizeDateTimeLocal(valueOf("transport_first_pickup"))) {
-        errors.transport_first_pickup = "Enter the first hotel pickup date/time.";
-      }
-      if (!isValidTime(valueOf("transport_additional"))) {
-        errors.transport_additional = "Enter the additional pickup time.";
+        errors.transport_first_pickup = "Enter the hotel pickup date/time.";
       }
       if (!isValidTime(valueOf("transport_return"))) {
-        errors.transport_return = "Enter the expected return time.";
+        errors.transport_return = "Enter the hotel drop-off time.";
       }
       requireFilled(errors, "transport_venue", "Enter the wedding venue for shuttle.");
     }
@@ -426,26 +426,20 @@
 
     requireRadio(errors, "giftbags_provided", "Select whether you will provide gift bags.");
     if (valueOf("giftbags_provided") === "yes") {
-      const bq = valueOf("bags_quantity");
-      if (bq === "" || !isValidNumeric(bq, false)) errors.bags_quantity = "Enter estimated bag quantity.";
+      requireFilled(errors, "bags_payment_method", "Select a gift bag payment method.");
       if (!dateIsoOf("bags_delivery_date")) errors.bags_delivery_date = "Select gift bag delivery date.";
       if (!isValidTime(valueOf("bags_delivery_time"))) {
         errors.bags_delivery_time = "Enter gift bag delivery time.";
       }
-      requireFilled(errors, "bags_deliverer", "Enter who is delivering the bags.");
       requireFilled(errors, "bags_distribution", "Enter distribution instructions.");
     }
 
     requireRadio(errors, "catering_needed", "Select whether you will require catering.");
     if (valueOf("catering_needed") === "yes") {
       requireFilled(errors, "catering_menu_choices", "Select a catering menu choice.");
-      const catering = normalizeDateTimeLocal(valueOf("catering_datetime")) || valueOf("catering_datetime");
-      if (!catering || !isValidDateTimeLocal(catering)) {
-        errors.catering_datetime = "Enter catering date and time.";
+      if (staffMode) {
+        requireRadio(errors, "menu_selected", "Select whether the BEO is signed and submitted.");
       }
-      const ba = valueOf("catering_numbers");
-      if (ba === "" || !isValidNumeric(ba, false)) errors.catering_numbers = "Enter catering numbers.";
-      requireRadio(errors, "menu_selected", "Select whether the menu was submitted.");
     }
 
     let vendorOk = false;
@@ -517,7 +511,6 @@
       ["date_menu_due", "menu selections due"],
       ["date_vendor_list", "final vendor list due"],
       ["date_gift_bag", "gift bag delivery"],
-      ["date_getting_ready", "getting-ready room access date"],
     ].forEach(([name, label]) => {
       const raw = dateDisplayOf(name);
       if (raw && !dateIsoOf(name)) errors[name] = "Select a valid " + label + ".";
@@ -536,16 +529,15 @@
         ["ceremony_time", "ceremony time"],
         ["reception_time", "reception time"],
         ["bags_delivery_time", "gift bag delivery time"],
-        ["transport_additional", "additional pickup time"],
-        ["transport_return", "return time"],
+        ["transport_return", "hotel drop-off"],
       ].forEach(([name, label]) => {
         const v = valueOf(name);
         if (v && !isValidTime(v)) errors[name] = "Enter a valid " + label + ".";
       });
 
       [
-        ["transport_first_pickup", "first hotel pickup"],
-        ["catering_datetime", "catering date and time"],
+        ["transport_first_pickup", "hotel pickup"],
+        ["date_getting_ready", "ready room access"],
       ].forEach(([name, label]) => {
         const v = valueOf(name);
         if (v && !isValidDateTimeLocal(v) && !normalizeDateTimeLocal(v)) {
@@ -553,7 +545,7 @@
         }
       });
 
-      ["guests", "getting_ready_guests", "bags_quantity", "catering_numbers"].forEach((name) => {
+      ["guests", "getting_ready_guests"].forEach((name) => {
         const v = valueOf(name);
         if (v && !isValidNumeric(v, true)) errors[name] = "Enter numbers only.";
       });
@@ -585,14 +577,6 @@
     if (data.wedding_date && departure && compareIso(departure, data.wedding_date) < 0) {
       errors.group_departure = "Departure is before the wedding date.";
     }
-    const cateringNorm = normalizeDateTimeLocal(valueOf("catering_datetime"));
-    if (cateringNorm && data.wedding_date && valueOf("catering_needed") === "yes") {
-      const cateringIso = cateringNorm.slice(0, 10);
-      if (cateringIso && compareIso(cateringIso, data.wedding_date) < 0) {
-        errors.catering_datetime = "Catering date is before the wedding date.";
-      }
-    }
-
     Object.keys(errors).forEach((key) => {
       if (key.indexOf("vendor_access_") === 0) return;
       showFieldError(key, errors[key]);
@@ -638,7 +622,14 @@
       return;
     }
     if (el.type === "datetime-local" || (el.hasAttribute && el.hasAttribute("data-datetime-input"))) {
-      el.value = normalizeDateTimeLocal(value) || "";
+      const norm = normalizeDateTimeLocal(value);
+      if (norm) {
+        el.value = norm;
+        return;
+      }
+      /* Older drafts may store date-only (YYYY-MM-DD) for ready room access */
+      const iso = normalizeDateToIso(String(value || "").slice(0, 10));
+      el.value = iso ? iso + "T00:00" : "";
       return;
     }
     if (el.type === "time" || (el.hasAttribute && el.hasAttribute("data-time-input"))) {
@@ -751,6 +742,22 @@
     });
   }
 
+  function collectConcessionsAwarded() {
+    return Array.from(document.querySelectorAll("input[data-concession]:checked")).map((el) => el.value);
+  }
+
+  function applyConcessionsAwarded(list) {
+    let values = [];
+    if (Array.isArray(list)) values = list;
+    else if (typeof list === "string" && list.trim()) {
+      values = list.split(/[;\n,]/).map((s) => s.trim()).filter(Boolean);
+    }
+    const set = new Set(values);
+    document.querySelectorAll("input[data-concession]").forEach((el) => {
+      el.checked = set.has(el.value);
+    });
+  }
+
   function formatAllergySummary(counts, names) {
     const parts = ALLERGY_TYPES.filter((t) => counts[t] > 0).map((t) => t + ": " + counts[t]);
     const countLine = parts.length ? parts.join("; ") : "None";
@@ -779,7 +786,35 @@
     els.vendorRows.appendChild(row);
   }
 
+  function formatTransportBlock() {
+    if (valueOf("transport_required") !== "yes") return "";
+    const pickup = normalizeDateTimeLocal(valueOf("transport_first_pickup")) || valueOf("transport_first_pickup");
+    const dropoff = isValidTime(valueOf("transport_return"))
+      ? valueOf("transport_return").slice(0, 5)
+      : valueOf("transport_return");
+    return [
+      "Company: " + valueOf("transport_company"),
+      "Contact: " + valueOf("transport_contact"),
+      "Vehicles: " + valueOf("transport_vehicles"),
+      "Hotel pickup: " + pickup,
+      "Hotel drop-off: " + dropoff,
+      "Venue: " + valueOf("transport_venue"),
+    ].join("\n");
+  }
+
+  function formatValetDetails() {
+    if (valueOf("valet_needed") !== "yes") return "";
+    return [
+      "Payment: " + valueOf("valet_payment"),
+      "Other: " + valueOf("valet_other"),
+      "Billing contact: " + valueOf("valet_billing_contact"),
+      "Instructions: " + valueOf("valet_billing_instructions"),
+    ].join("\n");
+  }
+
   function collectPayload() {
+    /* Active form fields → FormPayload / list targets.
+       Schema source: Backups/Wedding Room PlannervSchema.csv */
     const fields = [
       "couple_name",
       "email",
@@ -792,19 +827,18 @@
       "weekend_contact_phone",
       "guests",
       "guest_notes",
-      "couple_accommodations",
+      "couple_accommodations", /* FORM_ONLY — not a list column; stays in FormPayload */
       "getting_ready_needed",
       "getting_ready_guests",
       "vip_names",
-      "quote_number",
-      "master_account",
-      "market_code",
+      "quote_number", /* PENDING_LIST — Quote Number (add column if missing) */
+      "master_account", /* PENDING_LIST — Master Account */
+      "market_code", /* PENDING_LIST — Market Code */
       "transport_required",
       "transport_company",
       "transport_contact",
       "transport_vehicles",
       "transport_first_pickup",
-      "transport_additional",
       "transport_return",
       "transport_venue",
       "valet_needed",
@@ -813,17 +847,25 @@
       "valet_billing_contact",
       "valet_billing_instructions",
       "giftbags_provided",
-      "bags_quantity",
+      "bags_payment_method", /* → Gift Bag Payment Method */
       "bags_delivery_time",
-      "bags_deliverer",
       "bags_distribution",
       "catering_needed",
       "catering_menu_choices",
+      "CateringMenuSelections", /* → list CateringMenuSelections */
+      "menu_selected", /* → BEO Signed (Catering Menu Selected) */
+      "catering_allergy_names",
+      /* DEPRECATED_UI — remove after confirmed live (no form UI; was kept for old drafts)
+      "transport_additional",
       "catering_datetime",
       "catering_numbers",
-      "menu_selected",
-      "catering_allergy_names",
+      "bags_quantity",
+      "bags_deliverer",
+      */
     ];
+
+    const readyAccess =
+      normalizeDateTimeLocal(valueOf("date_getting_ready")) || valueOf("date_getting_ready");
 
     const payload = {
       complete_by: dateIsoOf("complete_by"),
@@ -835,7 +877,9 @@
       date_menu_due: dateIsoOf("date_menu_due"),
       date_vendor_list: dateIsoOf("date_vendor_list"),
       date_gift_bag: dateIsoOf("date_gift_bag"),
-      date_getting_ready: dateIsoOf("date_getting_ready"),
+      date_getting_ready: readyAccess,
+      /* Schema alias — Ready Room Access D/T */
+      ready_room_access_datetime: readyAccess,
     };
 
     fields.forEach((name) => {
@@ -844,14 +888,13 @@
         const d = digitsOnly(v, 10);
         v = d.length === 10 ? formatPhoneDisplay(d) : v;
       }
-      if (name === "catering_datetime" || name === "transport_first_pickup") {
+      if (name === "transport_first_pickup") {
         v = normalizeDateTimeLocal(v) || v;
       }
       if (
         name === "ceremony_time" ||
         name === "reception_time" ||
         name === "bags_delivery_time" ||
-        name === "transport_additional" ||
         name === "transport_return"
       ) {
         v = isValidTime(v) ? v.slice(0, 5) : v;
@@ -859,6 +902,7 @@
       payload[name] = v;
     });
 
+    /* Couple Parents → list CoupleParents (Note). Already active. */
     const parents = collectCoupleParents();
     payload.couple_parents_list = parents;
     payload.couple_parents = formatCoupleParentsText(parents);
@@ -870,6 +914,16 @@
       payload.catering_allergy_names
     );
 
+    /* Schema list targets composed / aliased for Power Automate
+       vip_upgrade / transport_block / valet_details: leave for PA; already composed there if needed */
+    payload.vip_upgrade = payload.vip_names; /* → VIP Upgrade */
+    payload.transport_block = formatTransportBlock(); /* → Shuttle/Trans Details */
+    payload.valet_details = formatValetDetails(); /* → Vendor Details */
+    payload.vendors = collectVendors(); /* → Vendor Name (JSON string in PA) */
+    payload.ConcessionsAwarded = collectConcessionsAwarded(); /* → Concessions Awarded (staff MultiChoice) */
+    /* staff_task_list: list-only checklist in SharePoint — not collected on the form */
+
+    /* DEPRECATED_LEGACY_ALIASES — remove after confirmed live
     payload.anticipated_rooms = payload.guest_notes;
     payload.bags_providing = payload.giftbags_provided;
     payload.brunch_hosting = payload.catering_needed;
@@ -877,17 +931,42 @@
     payload.brunch_attendance = payload.catering_numbers;
     payload.brunch_menu_submitted = payload.menu_selected;
     payload.brunch_requests = payload.catering_dietary_restrictions;
-    payload.vendors = collectVendors();
+    payload.catering_menu_selections = payload.CateringMenuSelections;
+    payload.concessions_awarded = payload.ConcessionsAwarded;
+    */
+
     return payload;
   }
 
   function applyPayload(payload) {
     if (!payload || typeof payload !== "object") return;
+    /* Still accept deprecated draft aliases when loading old rows */
     if (payload.guest_notes == null && payload.anticipated_rooms != null) {
       payload = { ...payload, guest_notes: payload.anticipated_rooms };
     }
     if (payload.giftbags_provided == null && payload.bags_providing != null) {
       payload = { ...payload, giftbags_provided: payload.bags_providing };
+    }
+    if (payload.catering_needed == null && payload.brunch_hosting != null) {
+      payload = { ...payload, catering_needed: payload.brunch_hosting };
+    }
+    if (payload.menu_selected == null && payload.brunch_menu_submitted != null) {
+      payload = { ...payload, menu_selected: payload.brunch_menu_submitted };
+    }
+    if (
+      (payload.date_getting_ready == null || payload.date_getting_ready === "") &&
+      payload.ready_room_access_datetime
+    ) {
+      payload = { ...payload, date_getting_ready: payload.ready_room_access_datetime };
+    }
+    if (payload.vip_names == null && payload.vip_upgrade != null) {
+      payload = { ...payload, vip_names: payload.vip_upgrade };
+    }
+    if (
+      (payload.CateringMenuSelections == null || payload.CateringMenuSelections === "") &&
+      payload.catering_menu_selections != null
+    ) {
+      payload = { ...payload, CateringMenuSelections: payload.catering_menu_selections };
     }
     autoCompleteBy = false;
     Object.keys(payload).forEach((key) => {
@@ -896,7 +975,14 @@
         key === "couple_parents" ||
         key === "couple_parents_list" ||
         key === "catering_allergy_counts" ||
-        key === "catering_dietary_restrictions"
+        key === "catering_dietary_restrictions" ||
+        key === "transport_block" ||
+        key === "valet_details" ||
+        key === "vip_upgrade" ||
+        key === "ready_room_access_datetime" ||
+        key === "ConcessionsAwarded" ||
+        key === "concessions_awarded" ||
+        key === "staff_task_list"
       ) {
         return;
       }
@@ -908,6 +994,7 @@
     else vendors.forEach((v) => addVendorRow(v));
     renderCoupleParentRows(payload.couple_parents_list);
     applyAllergyCounts(payload.catering_allergy_counts);
+    applyConcessionsAwarded(payload.ConcessionsAwarded != null ? payload.ConcessionsAwarded : payload.concessions_awarded);
     syncConditionals();
     const wedding = dateIsoOf("wedding_date");
     const expectedComplete = wedding ? addDaysIso(wedding, -30) : "";

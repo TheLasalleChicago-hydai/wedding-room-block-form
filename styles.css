@@ -488,12 +488,11 @@ textarea {
 }
 
 .allergy-counts {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.55rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem 1.5rem;
   margin-top: 0.65rem;
-  max-width: 16rem;
+  max-width: 28rem;
 }
 
 .allergy-count-row {
@@ -506,6 +505,23 @@ textarea {
   margin: 0;
   font-weight: 500;
   text-align: left;
+}
+
+.menu-doc-links a {
+  color: var(--navy);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.menu-doc-links a:hover {
+  color: var(--gold);
+}
+
+@media (max-width: 520px) {
+  .allergy-counts {
+    grid-template-columns: 1fr;
+    max-width: 16rem;
+  }
 }
 
 .allergy-count-row span {

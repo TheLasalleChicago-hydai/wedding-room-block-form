@@ -1,135 +1,138 @@
 # SharePoint ↔ form mapping (CSV-backed)
 
-**Canonical rule:** the CSV headers in `Backups/100926_Schema.csv` are the source of truth. The form payload keys and Power Automate keys must sync to the list header intent, using snake_case in JSON and the same human-readable label in SharePoint when practical.
+**Canonical schema:** `Backups/Wedding Room PlannervSchema.csv` (latest list export).  
+Payload keys live in `app.js` → `collectPayload()`.
 
-**Do not use legacy names:** `brunch_*`, `brunch_hosting`, `brunch_menu_submitted`, `brunch_datetime`, `brunch_attendance`, `brunch_requests`.
+**Do not use legacy names in new flow mapping:** `brunch_*`, `anticipated_rooms`, `bags_providing`, `bags_quantity`, `bags_deliverer`, `transport_additional`.
 
-## CSV-backed schema contract
+---
 
-These are the live list headers we must match exactly or intentionally map to the equivalent payload name:
+## Couple Parents — confirmed
 
-| CSV header | Canonical payload key | Notes |
-|-----------|----------------------|-------|
-| `Title` | `couple_name` | Same as the form title / couple name |
-| `FormURL` | `form_url` | Resume URL for draft / submitted form |
-| `DraftID` | `draft_id` | Unique draft key |
-| `Status` | `status` | `draft` / `submitted` |
-| `Wedding Date` | `wedding_date` | Date only |
-| `Complete By` | `complete_by` | Deadline |
-| `Created At` | `created_at` | Auto timestamp |
-| `Updated At` | `updated_at` | Auto timestamp |
-| `Submitted At` | `submitted_at` | Auto timestamp |
-| `Email` | `email` | Customer email |
-| `Phone` | `phone` | Customer phone |
-| `Couple Name` | `couple_name` | Stored separately from title |
-| `Couple Parents` | `couple_parents` | Optional parent info |
-| `Guests` | `guests` | Guest rooms (anticipated) count |
-| `Guest Notes` | `guest_notes` | Staff-only room needs / pickup notes |
-| `VIP Upgrade` | `vip_upgrade` | Optional VIP upgrade flag |
-| `Group Arrival` | `group_arrival` | Date only |
-| `Group Departure` | `group_departure` | Date only |
-| `Wedding Venue` | `wedding_venue` | Venue name |
-| `Ceremony Time` | `ceremony_time` | Time |
-| `Reception Venue` | `reception_venue` | Venue name |
-| `Reception Time` | `reception_time` | Time |
-| `Gift Bags Needed` | `giftbags_provided` | Gift bag flag |
-| `Gift Bag Payment Method` | `bags_payment_method` | Optional value |
-| `Vendor Valet Needed` | `valet_needed` | Valet flag |
-| `Vendor Name` | `vendors` | Vendor list data |
-| `Vendor Details` | `vendors` | Vendor note / nested vendor object |
-| `Valet Payment` | `valet_payment` | `individual` / `hosted` / `master` / `other` |
-| `Ready Room Needed` | `getting_ready_needed` | Resulting form flag |
-| `Ready Room Guests Number` | `getting_ready_guests` | Count |
-| `Ready Room Access D/T` | `ready_room_access_datetime` | Access date/time |
-| `Catering Needed` | `catering_needed` | Equivalent of the old `catering_required` naming |
-| `Catering Menu Choices` | `catering_menu_choices` | Menu options |
-| `Catering Menu Selected` | `menu_selected` | Selected menu choice |
-| `Catering Date/Time` | `catering_datetime` | Date/time |
-| `Catering Attendance Numbers` | `catering_numbers` | Attendance count |
-| `Catering Dietary Restriction` | `catering_dietary_restrictions` | Dietary notes |
-| `Shuttle Bus Required` | `transport_required` | Shuttle flag |
-| `Shuttle/Trans Details` | `transport_block` | Combined transport details |
-| `In-House Contact Name` | `weekend_contact_name` | Contact name; SharePoint internal name is `WeekendContact` |
-| `In-House Contact Phone` | `weekend_contact_phone` | Contact phone; SharePoint internal name is `WeekendPhone` |
-| `FormPayload` | `form_payload` | Raw JSON snapshot |
-| `Guest Rooms Due Date` | `date_room_cutoff` | Internal date |
-| `Menu Due Date` | `date_menu_due` | Internal date |
-| `Vendor List Due Date` | `date_vendor_list` | Internal date |
-| `Gift Bag Due Date` | `date_gift_bag` | Internal date |
-| `Staff Task List` | `staff_task_list` | Staff-only list reference |
-| `Quote Number` | `quote_number` | Staff-only; from CI after booking |
-| `Master Account` | `master_account` | Staff-only; from CI — not DraftID |
-| `Market Code` | `market_code` | Staff-only; from CI |
+| List column | Internal | Payload |
+|-------------|----------|---------|
+| **Couple Parents** | `CoupleParents` | **`couple_parents`** (text: `Name (relation); …`) |
+
+Also sent: `couple_parents_list` (structured array for the form UI only).  
+Power Automate Create/Update: map **Couple Parents** ← `json(triggerBody())?['payload']?['couple_parents']`.
+
+---
+
+## CSV header → payload (active)
+
+| CSV / list DisplayName | Internal name | Payload key | Notes |
+|------------------------|---------------|-------------|-------|
+| Title | Title | `couple_name` | Same as couple name |
+| FormURL | FormURL | *(flow)* | Resume URL from PA |
+| DraftID | DraftID | *(flow)* / body `draft_id` | |
+| Status | Status | *(flow)* | `draft` / `submitted` |
+| Wedding Date | WeddingDate | `wedding_date` | |
+| Complete By | CompleteBy | `complete_by` | |
+| Created At | Createdat | *(flow)* `utcNow()` | |
+| Updated At | Updatedat | *(flow)* `utcNow()` | |
+| Submitted At | Submittedat | *(flow)* on submit | |
+| Email | Email | `email` | |
+| Phone | Phone | `phone` | |
+| Couple Name | CoupleName | `couple_name` | |
+| Couple Parents | CoupleParents | `couple_parents` | **Confirmed in payload** |
+| VIP Upgrade | VIPUpgrade | `vip_upgrade` (= `vip_names`) | Guest free-text; PA may already compose |
+| Concessions Awarded | ConcessionsAwarded | **`ConcessionsAwarded`** | Staff MultiChoice array: Concession 1–4 |
+| Guests Anticipated | Guests | `guests` | |
+| Guest Notes | GuestNotes | `guest_notes` | Staff-only on form |
+| Group Arrival | GroupArrival | `group_arrival` | |
+| Group Departure | GroupDeparture | `group_departure` | |
+| Wedding Venue | WeddingVenue | `wedding_venue` | |
+| Ceremony Time | WeddingTime | `ceremony_time` | Internal still `WeddingTime` |
+| Reception Venue | ReceptionVenue | `reception_venue` | |
+| Reception Time | ReceptionTime | `reception_time` | |
+| Gift Bags Needed | GiftBags | `giftbags_provided` | yes/no |
+| Gift Bag Payment Method | GiftBagPayment | `bags_payment_method` | Exact choice strings |
+| Vendor Valet Needed | ValetNeeded | `valet_needed` | |
+| Vendor Name | Vendors | `vendors` | JSON array; stringify in PA |
+| Vendor Details | ValetDetails | `valet_details` | Composed text block |
+| Valet Payment | ValetPayment | `valet_payment` | |
+| Ready Room Needed | ReadyRoom | `getting_ready_needed` | |
+| Ready Room Guests Number | ReadyRoomGuests | `getting_ready_guests` | |
+| Ready Room Access D/T | ReadyRoomAccess | `ready_room_access_datetime` (= `date_getting_ready`) | datetime |
+| Catering Needed | CateringNeeded | `catering_needed` | |
+| Catering Menu Choices | CateringMenuChoices | `catering_menu_choices` | Form options may differ from list MultiChoice — align later |
+| CateringMenuSelections | CateringMenuSelections | **`CateringMenuSelections`** | Guest free-text under menu choices |
+| Catering Dietary Restriction | CateringDietaryRestriction | `catering_dietary_restrictions` | Allergy summary text |
+| BEO Signed (Catering Menu Selected) | CateringMenuSelected | `menu_selected` | Staff-only on form |
+| Shuttle Bus Required | Shuttlebus | `transport_required` | |
+| Shuttle/Trans Details | TransportBlock | `transport_block` | Composed |
+| In-House Contact Name | WeekendContact | `weekend_contact_name` | |
+| In-House Contact Phone | WeekendPhone | `weekend_contact_phone` | |
+| FormPayload | FormPayload | full `payload` JSON | |
+| Guest Rooms Due Date | TotalRoomsDue | `date_room_cutoff` | Staff |
+| Menu Due Date | MenuDue | `date_menu_due` | Staff |
+| Vendor List Due Date | VendorListDue | `date_vendor_list` | Staff |
+| Gift Bag Due Date | GiftBagDue | `date_gift_bag` | Staff |
+| Staff Task List | StaffTaskList | *(list only)* | Staff marks complete in SharePoint — not on form |
+
+### Gift Bag Payment Method — choice values (exact)
+
+- `$6/bag charged to credit card on file`
+- `$6/bag charged to couple's room`
+- `Complimentary as concession`
+
+---
+
+## PENDING_LIST (in form payload; add list columns if missing)
+
+| Payload | Intended list column |
+|---------|----------------------|
+| `quote_number` | Quote Number |
+| `master_account` | Master Account |
+| `market_code` | Market Code |
+
+Not in the latest schema CSV header row — keep in FormPayload; add list fields when ready.
+
+---
+
+## FORM_ONLY (payload only; no list column)
+
+| Payload | Notes |
+|---------|--------|
+| `couple_accommodations` | Staff textarea |
+| `couple_parents_list` | UI structure |
+| `catering_allergy_counts` | Object; summary goes to dietary column |
+| `catering_allergy_names` | Feeds dietary summary |
+| Transport detail keys (`transport_company`, …) | Also rolled into `transport_block` |
+| Valet detail keys (`valet_other`, …) | Also rolled into `valet_details` |
+| `bags_delivery_date` / `bags_delivery_time` / `bags_distribution` | Inside FormPayload; payment maps to list |
+
+---
+
+## DEPRECATED_UI / DEPRECATED_LEGACY — commented out in `collectPayload`
+
+Remove from code after confirmed live (search `DEPRECATED_` in `app.js`):
+
+| Old key | Reason |
+|---------|--------|
+| `bags_quantity` | Removed from form |
+| `bags_deliverer` | Removed from form |
+| `transport_additional` | Removed from form |
+| `catering_datetime` | Removed from form (list column may still exist) |
+| `catering_numbers` | Removed from form (list: Catering Attendance Number) |
+| `brunch_*` | Legacy brunch aliases |
+| `anticipated_rooms` | Alias of `guest_notes` |
+| `bags_providing` | Alias of `giftbags_provided` |
+
+Old drafts: `applyPayload` still **reads** brunch / anticipated / bags_providing aliases when loading.
+
+---
+
+## Power Automate Create/Update — high-value expressions
+
+```text
+CoupleParents:           @{json(triggerBody())?['payload']?['couple_parents']}
+GiftBagPayment:          @{json(triggerBody())?['payload']?['bags_payment_method']}
+CateringMenuSelections:  @{json(triggerBody())?['payload']?['CateringMenuSelections']}
+ConcessionsAwarded:      @{json(triggerBody())?['payload']?['ConcessionsAwarded']}
+ReadyRoomAccess:         @{json(triggerBody())?['payload']?['ready_room_access_datetime']}
+```
+
+`VIPUpgrade` / `TransportBlock` / `ValetDetails` — leave existing PA compose/mapping as-is; payload still includes `vip_upgrade`, `transport_block`, `valet_details` if needed.
 
 See `RESUME-TEMPLATE.md` for Generate Resume + Word content-control map.
-
-## Required alignment rule
-
-- The CSV header name is authoritative for the actual list column.
-- The payload name should match the meaning of that header in snake_case.
-- If a column was renamed or legacy-brunch-labeled in earlier drafts, it must be updated to the CSV-backed version above.
-- No new mapping should be added based on memory or old naming. If the header is not in the CSV, do not add it unless the list is updated first.
-
-## Form → list working map
-
-| List column | Type | Payload / expression |
-|-------------|------|----------------------|
-| `Title` | Text | `couple_name` |
-| `DraftID` | Text | `variables('DraftIDFinal')` / `outputs('DraftID_Submit')` |
-| `Status` | Text | `draft` / `submitted` |
-| `Created At` | DateTime | `utcNow()` |
-| `Updated At` | DateTime | `utcNow()` |
-| `Submitted At` | DateTime | `utcNow()` on submit |
-| `Couple Name` | Text | `couple_name` |
-| `FormURL` | Text/Hyperlink | Resume URL expression |
-| `Wedding Date` | DateOnly | `wedding_date` |
-| `Complete By` | DateOnly | `complete_by` |
-| `Email` | Text | `email` |
-| `Phone` | Text | `phone` |
-| `Guests` | Number | `guests` |
-| `Guest Notes` | Text | `guest_notes` (staff-only form field) |
-| `Group Arrival` | DateOnly | `group_arrival` |
-| `Group Departure` | DateOnly | `group_departure` |
-| `Wedding Venue` | Text | `wedding_venue` |
-| `Ceremony Time` | Text | `ceremony_time` |
-| `Reception Venue` | Text | `reception_venue` |
-| `Reception Time` | Text | `reception_time` |
-| `Gift Bags Needed` | Choice yes/no | `giftbags_provided` |
-| `Gift Bag Payment Method` | Choice | `bags_payment_method` |
-| `Vendor Valet Needed` | Choice yes/no | `valet_needed` |
-| `Valet Payment` | Choice | `valet_payment` |
-| `Ready Room Needed` | Choice yes/no | `getting_ready_needed` |
-| `Ready Room Guests Number` | Number | `getting_ready_guests` |
-| `Catering Needed` | Choice yes/no | `catering_needed` |
-| `Catering Menu Selected` | Choice yes/no | `menu_selected` |
-| `Catering Date/Time` | DateTime | `catering_datetime` |
-| `Catering Attendance Numbers` | Number | `catering_numbers` |
-| `Catering Dietary Restriction` | Note | `catering_dietary_restrictions` |
-| `Shuttle Bus Required` | Choice yes/no | `transport_required` |
-| `Shuttle/Trans Details` | Note | `transport_block` |
-| `In-House Contact Name` | Text | `weekend_contact_name` |
-| `In-House Contact Phone` | Text | `weekend_contact_phone` |
-| `FormPayload` | Note | `string(json(triggerBody())?['payload'])` |
-
-### Form URL (resume link)
-
-1. In the list, add or confirm **FormURL**.
-2. On create / update, store the resume URL via the same `concat(...)` expression pattern for both save and submit paths.
-3. This should always match the live list header, not any legacy variable naming.
-
-## Composes
-
-**ValetDetails**
-```text
-Other: @{json(triggerBody())?['payload']?['valet_other']}
-Billing contact: @{json(triggerBody())?['payload']?['valet_billing_contact']}
-Instructions: @{json(triggerBody())?['payload']?['valet_billing_instructions']}
-```
-
-**TransportBlock** — company, contact, vehicles, pickups, return, venue (same as before).
-
-**VipAccess**
-```text
-VIP: @{json(triggerBody())?['payload']?['vip_names']}
-Accessibility: @{json(triggerBody())?['payload']?['accessibility']}
-```
