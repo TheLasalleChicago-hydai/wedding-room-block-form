@@ -311,6 +311,7 @@
     return (
       isValidReadyRoomDateTime(normalizedStart) &&
       isValidReadyRoomDateTime(normalizedEnd) &&
+      normalizedStart.slice(0, 10) === normalizedEnd.slice(0, 10) &&
       normalizedEnd > normalizedStart
     );
   }
@@ -419,7 +420,7 @@
         normalizeDateTimeLocal(valueOf("date_getting_ready")) &&
         !isValidReadyRoomDateTimeRange(valueOf("date_getting_ready"), valueOf("date_getting_ready_end"))
       ) {
-        errors.date_getting_ready_end = "End must be after the ready room access start.";
+        errors.date_getting_ready_end = "End must be after the ready room access start on the same date.";
       }
     }
 
@@ -581,7 +582,7 @@
         readyRoomAccessEnd &&
         !isValidReadyRoomDateTimeRange(readyRoomAccess, readyRoomAccessEnd)
       ) {
-        errors.date_getting_ready_end = "End must be after the ready room access start.";
+        errors.date_getting_ready_end = "End must be after the ready room access start on the same date.";
       }
 
       ["guests", "getting_ready_guests"].forEach((name) => {
