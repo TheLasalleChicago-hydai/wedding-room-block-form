@@ -298,6 +298,13 @@
     return "";
   }
 
+  function isValidReadyRoomDateTime(value) {
+    const normalized = normalizeDateTimeLocal(value);
+    if (!normalized) return false;
+    const time = normalized.slice(11, 16);
+    return time >= "08:00" && time <= "17:00";
+  }
+
   function setStatus(message, kind) {
     els.saveStatus.textContent = message;
     els.saveStatus.classList.remove("is-error", "is-ok");
@@ -393,17 +400,13 @@
       if (rr === "" || !isValidNumeric(rr, false)) {
         errors.getting_ready_guests = "Enter ready room estimated guest count.";
       }
-      if (!normalizeDateTimeLocal(valueOf("date_getting_ready"))) {
-        errors.date_getting_ready = "Select ready room access date and time.";
+      if (!isValidReadyRoomDateTime(valueOf("date_getting_ready"))) {
+        errors.date_getting_ready = "Select a ready room access time between 8:00 AM and 5:00 PM.";
       }
     }
 
     requireRadio(errors, "transport_required", "Select whether a shuttle bus is required.");
     if (valueOf("transport_required") === "yes") {
-      requireFilled(errors, "transport_company", "Enter the transportation company.");
-      if (!isValidPhone(valueOf("transport_contact"))) {
-        errors.transport_contact = "Enter a valid transport contact phone.";
-      }
       requireFilled(errors, "transport_vehicles", "Enter number / type of vehicles.");
       if (!normalizeDateTimeLocal(valueOf("transport_first_pickup"))) {
         errors.transport_first_pickup = "Enter the hotel pickup date/time.";
@@ -411,7 +414,6 @@
       if (!isValidTime(valueOf("transport_return"))) {
         errors.transport_return = "Enter the hotel drop-off time.";
       }
-      requireFilled(errors, "transport_venue", "Enter the wedding venue for shuttle.");
     }
 
     requireRadio(errors, "valet_needed", "Select whether vendors need valet parking.");
@@ -544,13 +546,16 @@
 
       [
         ["transport_first_pickup", "hotel pickup"],
-        ["date_getting_ready", "ready room access"],
       ].forEach(([name, label]) => {
         const v = valueOf(name);
         if (v && !isValidDateTimeLocal(v) && !normalizeDateTimeLocal(v)) {
           errors[name] = "Enter a valid " + label + ".";
         }
       });
+      const readyRoomAccess = valueOf("date_getting_ready");
+      if (readyRoomAccess && !isValidReadyRoomDateTime(readyRoomAccess)) {
+        errors.date_getting_ready = "Enter a ready room access time between 8:00 AM and 5:00 PM.";
+      }
 
       ["guests", "getting_ready_guests"].forEach((name) => {
         const v = valueOf(name);
@@ -1580,7 +1585,10 @@
     document.querySelectorAll("[data-datetime-input]").forEach((input) => {
       input.addEventListener("change", () => {
         const v = input.value.trim();
-        if (v && !isValidDateTimeLocal(v)) input.classList.add("is-invalid");
+        const valid = input.id === "date_getting_ready"
+          ? isValidReadyRoomDateTime(v)
+          : isValidDateTimeLocal(v);
+        if (v && !valid) input.classList.add("is-invalid");
         else input.classList.remove("is-invalid");
         markDirty();
       });
