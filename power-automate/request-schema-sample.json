@@ -6,6 +6,11 @@
   "payload": {
     "couple_name": "Smith & Jones",
     "wedding_date": "2026-06-14",
+    "date_getting_ready": "2026-06-13T09:46",
+    "ready_room_access_datetime": "2026-06-13T09:46",
+    "bags_delivery_date": "2026-06-13",
+    "bags_delivery_time": "09:00",
+    "bags_distribution": "Tag individualized bags with the guest name.",
     "complete_by": "2026-05-01",
     "email": "guest@example.com",
     "phone": "(312) 555-0100",

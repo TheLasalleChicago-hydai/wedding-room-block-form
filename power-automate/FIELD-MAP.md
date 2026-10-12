@@ -117,13 +117,15 @@ Also sent: `couple_parents_list` (UI only).
 | Reception Time | ReceptionTime | `reception_time` | |
 | Gift Bags Needed | GiftBags | `giftbags_provided` | Choice /Value |
 | Gift Bag Payment Method | GiftBagPayment | `bags_payment_method` | Choice /Value |
+| Gift Bag Expected Drop-off | GiftBagDelivery | `bags_delivery_date` + `bags_delivery_time` | SharePoint DateTime; combine and convert from Central Standard Time to UTC before writing |
+| Gift Bag Distribution Instructions | GiftBagInstructions | `bags_distribution` | SharePoint multiple lines of text |
 | Vendor Valet Needed | ValetNeeded | `valet_needed` | Choice /Value |
 | Vendor Name | Vendors | `vendors` | string(JSON) |
 | Vendor Details | ValetDetails | Compose ValetDetails* | |
 | Valet Payment | ValetPayment | `valet_payment` | Choice /Value |
 | Ready Room Needed | ReadyRoom | `getting_ready_needed` | Choice /Value |
 | Ready Room Guests Number | ReadyRoomGuests | `getting_ready_guests` | |
-| Ready Room Access D/T | ReadyRoomAccess | `date_getting_ready` | |
+| Ready Room Access D/T | ReadyRoomAccess | `date_getting_ready` | SharePoint DateTime; convert from `Central Standard Time` to `UTC` before writing so the displayed local time is preserved |
 | Catering Needed | CateringNeeded | `catering_needed` | Choice /Value |
 | Catering Menu Choices | CateringMenuChoices | `catering_menu_choices` | Text; ≤1 bride, ≤1 groom, + Catering Menu; PA `join` |
 | Catering Menu Selections | CateringMenuSelections | `CateringMenuSelections` | Note |
@@ -168,7 +170,7 @@ Also sent: `couple_parents_list` (UI only).
 | `catering_allergy_names` | Feeds dietary summary |
 | Transport detail keys | Also in `transport_block` |
 | Valet detail keys | Also in `valet_details` |
-| `bags_delivery_*` / `bags_distribution` | Inside FormPayload |
+| `bags_delivery_*` / `bags_distribution` | Also retained inside FormPayload; map the three dedicated GiftBag columns above for list visibility |
 
 ---
 

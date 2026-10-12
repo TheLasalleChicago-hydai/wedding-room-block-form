@@ -128,6 +128,34 @@ Create these Compose actions (names exact):
 | `PayloadText` | `string(json(triggerBody())?['payload'])` |
 | `NowUtc` | `utcNow()` |
 
+For the SharePoint **Ready Room Access D/T** field, use this expression in both
+the Save Draft and Submit **Create item / Update item** actions:
+
+```text
+@if(empty(json(triggerBody())?['payload']?['date_getting_ready']), null, convertTimeZone(json(triggerBody())?['payload']?['date_getting_ready'], 'Central Standard Time', 'UTC', 'yyyy-MM-ddTHH:mm:ssZ'))
+```
+
+The form value is a local Central Time value. Converting it to UTC before writing
+to SharePoint prevents SharePoint from subtracting the time-zone offset again.
+Do not use `formatDateTime(..., 'yyyy-MM-dd')`; that removes the access time.
+
+Add these SharePoint columns if they do not already exist:
+
+| Display name | Internal name | Type |
+|---|---|---|
+| Gift Bag Expected Drop-off | `GiftBagDelivery` | Date and time |
+| Gift Bag Distribution Instructions | `GiftBagInstructions` | Multiple lines of text |
+
+Map them in both the Save Draft and Submit **Create item / Update item** actions:
+
+```text
+Gift Bag Expected Drop-off:
+@if(or(empty(json(triggerBody())?['payload']?['bags_delivery_date']), empty(json(triggerBody())?['payload']?['bags_delivery_time'])), null, convertTimeZone(concat(json(triggerBody())?['payload']?['bags_delivery_date'], 'T', json(triggerBody())?['payload']?['bags_delivery_time']), 'Central Standard Time', 'UTC', 'yyyy-MM-ddTHH:mm:ssZ'))
+
+Gift Bag Distribution Instructions:
+json(triggerBody())?['payload']?['bags_distribution']
+```
+
 ### 2.3 SharePoint — Get items
 
 | Field | Value |
@@ -166,6 +194,7 @@ SharePoint **Update item**:
 | Email | `outputs('CustomerEmail')` |
 | Phone | `outputs('CustomerPhone')` |
 | Payload | `outputs('PayloadText')` |
+| Ready Room Access D/T | `@if(empty(json(triggerBody())?['payload']?['date_getting_ready']), null, convertTimeZone(json(triggerBody())?['payload']?['date_getting_ready'], 'Central Standard Time', 'UTC', 'yyyy-MM-ddTHH:mm:ssZ'))` |
 
 ### 2.6 False branch — Create item
 
@@ -184,6 +213,7 @@ SharePoint **Create item** — same site/list. Map:
 | Email | `outputs('CustomerEmail')` |
 | Phone | `outputs('CustomerPhone')` |
 | Payload | `outputs('PayloadText')` |
+| Ready Room Access D/T | `@if(empty(json(triggerBody())?['payload']?['date_getting_ready']), null, convertTimeZone(json(triggerBody())?['payload']?['date_getting_ready'], 'Central Standard Time', 'UTC', 'yyyy-MM-ddTHH:mm:ssZ'))` |
 
 ### 2.7 Send an email (V2) — customer resume link
 
