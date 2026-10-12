@@ -273,12 +273,12 @@
                 <div class="field" data-field="catering_menu_choices" style="grid-column: 1 / -1">
                   <label>Catering menu choices</label>
                   <p class="hint">
+                    If you choose Farewell Brunch or Catering Menu, enter items in Catering menu section below.
                     Pick up to one Bride package, up to one Groom package, and/or Catering Menu.
-                    If you choose Catering Menu, enter items in Catering menu selections below.
                   </p>
                   <fieldset class="menu-choice-group">
                     <legend>
-                      <a href="assets/LaSalle%20Farewell%20Brunch.pdf" target="_blank" rel="noopener noreferrer" class="menu-link-title">Farewell Brunch</a>
+                      <a href="assets/LaSalle%20Farewell%20Brunch%20Menu.pdf" target="_blank" rel="noopener noreferrer" class="menu-link-title">Farewell Brunch</a>
                     </legend>
                     <div class="choice-row">
                       <label><input type="checkbox" name="catering_menu_choices" value="Farewell Brunch" data-menu-choice data-menu-group="menu" /> Farewell Brunch</label>
@@ -320,7 +320,7 @@
                   <div class="field" data-field="CateringMenuSelections">
                     <label for="CateringMenuSelections">Catering menu selections</label>
                     <p class="hint">
-                      If ordering the Farewell Brunch or from the Catering Menu, please type your selections here.
+                      If ordering from the Farewell Brunch or from the Catering Menu, please type your selections here.
                     </p>
                     <textarea
                       id="CateringMenuSelections"
@@ -492,10 +492,10 @@
                 <div class="field" data-field="valet_payment">
                   <label>How will vendor valet be billed?</label>
                   <div class="choice-row">
-                    <label><input type="radio" name="valet_payment" value="Room" /> Room</label>
+                    <label><input type="radio" name="valet_payment" value="Couple's Room" /> Room</label>
                     <label><input type="radio" name="valet_payment" value="CC on File" /> CC on File</label>
-                    <label><input type="radio" name="valet_payment" value="Vendor Charge" /> Vendor Charge</label>
-                    <label><input type="radio" name="valet_payment" value="other" /> Other</label>
+                    <label><input type="radio" name="valet_payment" value="Charge to Vendors" /> Vendor Charge</label>
+                    <label><input type="radio" name="valet_payment" value="Other (Select Vendor Payment)" /> Other</label>
                   </div>
                   <div class="field-error" data-error-for="valet_payment"></div>
                 </div>
@@ -503,7 +503,7 @@
                   <div class="field" data-field="valet_other">
                     <label for="valet_other">Selective vendor payment</label>
                     <p class="hint">
-                      If paying for select vendors only, choose Other and list those vendor names here.
+                      If paying for select vendors only, list those vendor names here.
                     </p>
                     <input
                       id="valet_other"
@@ -515,13 +515,8 @@
                   </div>
                 </div>
                 <div class="field-grid two">
-                  <div class="field" data-field="valet_billing_contact">
-                    <label for="valet_billing_contact">Authorized billing contact</label>
-                    <input id="valet_billing_contact" name="valet_billing_contact" type="text" />
-                    <div class="field-error" data-error-for="valet_billing_contact"></div>
-                  </div>
                   <div class="field" data-field="valet_billing_instructions" style="grid-column: 1 / -1">
-                    <label for="valet_billing_instructions">Billing instructions</label>
+                    <label for="valet_billing_instructions">Billing instructions (optional)</label>
                     <input id="valet_billing_instructions" name="valet_billing_instructions" type="text" />
                     <div class="field-error" data-error-for="valet_billing_instructions"></div>
                   </div>

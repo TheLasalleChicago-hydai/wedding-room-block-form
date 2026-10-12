@@ -443,7 +443,7 @@
         errors.catering_menu_choices =
           "Select at least one: a Bride package, a Groom package, and/or Catering Menu.";
       }
-      if (menuChoices.includes("Catering Menu")) {
+      if (menuChoices.includes("Catering Menu") || menuChoices.includes("Farewell Brunch")) {
         requireFilled(errors, "CateringMenuSelections", "Enter your catering menu selections.");
       }
       if (staffMode) {
@@ -1055,7 +1055,8 @@
     toggle("catering-details", valueOf("catering_needed") === "yes");
     toggle(
       "catering-menu-selections-details",
-      valueOf("catering_needed") === "yes" && collectCateringMenuChoices().includes("Catering Menu")
+      valueOf("catering_needed") === "yes" &&
+        collectCateringMenuChoices().some((choice) => ["Catering Menu", "Farewell Brunch"].includes(choice))
     );
   }
 
