@@ -268,6 +268,9 @@
             </div>
             <div class="field" data-field="catering_needed" style="margin-top: 1.25rem">
               <label>Will you require catering at The LaSalle?</label>
+                  <p class="hint">
+                    Note: outside food and beverages are not permitted in hotel event or function related spaces.
+                  </p>
               <div class="choice-row">
                 <label><input type="radio" name="catering_needed" value="yes" /> Yes</label>
                 <label><input type="radio" name="catering_needed" value="no" /> No</label>
@@ -388,7 +391,6 @@
                   <option value="">Select…</option>
                   <option value="$6/bag charged to credit card on file">$6/bag charged to credit card on file</option>
                   <option value="$6/bag charged to couple's room">$6/bag charged to couple's room</option>
-                  <option value="Complimentary as concession">Complimentary as concession</option>
                 </select>
                 <div class="field-error" data-error-for="bags_payment_method"></div>
               </div>
@@ -421,7 +423,7 @@
           <section class="section" aria-labelledby="sec-transport">
             <h2 id="sec-transport">Transportation / shuttles</h2>
             <div class="field" data-field="transport_required">
-              <label>Shuttle bus required? (temporary valet park)</label>
+              <label>Do you have a shuttle bus that will require temporary valet parking?</label>
               <div class="choice-row">
                 <label><input type="radio" name="transport_required" value="yes" /> Yes</label>
                 <label><input type="radio" name="transport_required" value="no" /> No</label>
